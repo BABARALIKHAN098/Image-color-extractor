@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Extractor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .error-message {
+            color: #d32f2f;
+            background-color: #ffcdd2;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .color-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+            width: 150px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .color-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .color-preview {
+            height: 100px;
+            width: 100%;
+        }
+
+        .color-info {
+            padding: 10px;
+            text-align: center;
+        }
+
+        .hex-code {
+            font-family: monospace;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .copy-hint {
+            font-size: 0.7rem;
+            color: #888;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-palette"></i> Color Extractor</h1>
+            <p>Upload an image to extract its most prominent colors.</p>
+        </header>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="flashes">
+            {% for message in messages %}
+            <div class="error-message">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div class="upload-section">
+            <form method="post" enctype="multipart/form-data" id="upload-form">
+                <label for="file-upload" class="custom-file-upload">
+                    <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                </label>
+                <input id="file-upload" type="file" name="file" accept="image/*" onchange="this.form.submit()">
+            </form>
+        </div>
+
+        {% if image_data %}
+        <div class="results-section">
+            <h2>Your Image</h2>
+            <img src="{{ image_data }}" alt="Uploaded Image" class="image-preview"
+                style="display: block; margin: 0 auto;">
+
+            {% if colors %}
+            <h2>Extracted Palette</h2>
+            <div class="palette">
+                {% for color in colors %}
+                <div class="color-card" onclick="copyToClipboard('{{ color.hex }}')">
+                    <div class="color-preview" style="background-color: {{ color.hex }};"></div>
+                    <div class="color-info">
+                        <div class="hex-code">{{ color.hex }}</div>
+                        <div class="copy-hint">Click to Copy</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <footer>
+            <p>Built with Flask & Numpy</p>
+        </footer>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function () {
+                alert('Color ' + text + ' copied to clipboard!');
+            }, function (err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+    </script>
+</body>
+
+</html>
